@@ -30,3 +30,10 @@ class StringUtils:
         names = [t for t in tokens]
         df = pd.DataFrame(distances, index=names, columns=names)
         df.to_csv(output_file, index=True, header=True, sep=',')
+
+    @staticmethod
+    def tokenize_multi_word_strings(tokens):
+        normalized_tokens = []
+        for token in tokens:
+            normalized_tokens.append(token.split())
+        return normalized_tokens

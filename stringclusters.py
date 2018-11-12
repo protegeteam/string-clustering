@@ -45,7 +45,7 @@ class Algorithm(Enum):
 class StringClusters:
 
     def __init__(self, output_folder):
-        self.output_file = output_folder
+        self.output_folder = output_folder
         logging.basicConfig(level=logging.INFO)
 
     # cluster the given tokens according to their similarity distances using affinity propagation.
@@ -57,15 +57,15 @@ class StringClusters:
         ap.fit(distances)
 
         end_time = time.time()
-        logging.info("Affinity Propagation clustering time: " + str(end_time - start_time) + "s")
+        logging.info("Affinity propagation clustering time: " + str(end_time - start_time) + "s")
         return self.build_ap_cluster_dictionary(ap.labels_, tokens, ap.cluster_centers_indices_)
 
     # HDBSCAN clustering
     def cluster_hdbscan(self, distances, tokens):
         start_time = time.time()
 
-        hdbscan_ = hdbscan.HDBSCAN()
-        hdbscan_.fit(distances)
+        hdbscan_ = hdbscan.HDBSCAN(min_samples=15, alpha=1.0, min_cluster_size=5, metric='precomputed')
+        hdbscan_.fit(distances.astype(np.float64))
 
         end_time = time.time()
         logging.info("HDBSCAN clustering time: " + str(end_time-start_time) + "s")
@@ -75,7 +75,7 @@ class StringClusters:
     def cluster_dbscan(self, distances, tokens):
         start_time = time.time()
 
-        dbscan = sklearn.cluster.DBSCAN(eps=0.3, min_samples=10)
+        dbscan = sklearn.cluster.DBSCAN(eps=0.2, min_samples=20, metric='precomputed')
         dbscan.fit(distances)
 
         end_time = time.time()
@@ -91,7 +91,7 @@ class StringClusters:
         meanshift.fit(distances)
 
         end_time = time.time()
-        logging.info("MeanShift clustering time: " + str(end_time - start_time) + "s")
+        logging.info("Mean shift clustering time: " + str(end_time - start_time) + "s")
         return self.build_cluster_dictionary(meanshift.labels_, tokens)
 
     def build_cluster_dictionary(self, labels, tokens):
@@ -127,8 +127,8 @@ class StringClusters:
             raise ValueError("Unknown clustering algorithm: '" + clustering_algorithm + "'. Supported values are: " +
                              str([alg.value for alg in Algorithm]))
 
-        StringUtils.save_dictionary_as_json(self.output_file + "clusters_" + clustering_algorithm + ".json", clusters)
-        StringUtils.save_distances_matrix(self.output_file + "distances_" + distance_metric + ".csv", distances, tokens)
+        StringUtils.save_dictionary_as_json(self.output_folder + "clusters_" + clustering_algorithm + ".json", clusters)
+        StringUtils.save_distances_matrix(self.output_folder + "distances_" + distance_metric + ".csv", distances, tokens)
         return clusters
 
 
@@ -168,5 +168,4 @@ def get_arguments():
 if __name__ == "__main__":
     args = get_arguments()
     strings = StringUtils.parse_file(args[0])
-    str_clusters = StringClusters(args[1])
-    str_clusters.cluster(strings, args[2], args[3])
+    StringClusters(args[1]).cluster(strings, args[2], args[3])

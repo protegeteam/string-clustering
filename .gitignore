@@ -1,2 +1,5 @@
 .idea
-test/*
+test*
+__pycache__
+*.npy
+*.bin

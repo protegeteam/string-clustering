@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """Provides StringDistance class"""
 
+import logging
+import time
 from enum import Enum
 
 import jellyfish
 import numpy as np
-import spacy
+from gensim.models import Word2Vec, KeyedVectors
+from similarity.jaccard import Jaccard
+from stringutils import StringUtils
 
 __author__ = "Rafael Gonçalves, Stanford University"
 
@@ -15,7 +19,7 @@ class Distance(Enum):
     DAMERAU_LEVENSHTEIN = 'damerau'
     JARO = 'jaro'
     JARO_WINKLER = 'winkler'
-    MATCH_RATING = 'match_rating'
+    JACCARD = 'jaccard'
     EUCLIDEAN = 'euclidean'
 
 
@@ -23,49 +27,43 @@ class StringDistance:
 
     def __init__(self):
         self.vectors = dict()
+        logging.basicConfig(level=logging.INFO)
 
     def get_levenshtein_distances(self, tokens):
+        start_time = time.time()
         distances = -1 * np.array([[jellyfish.levenshtein_distance(w1, w2) for w1 in tokens] for w2 in tokens])
+        end_time = time.time()
+        logging.info("Levenshtein distances computation time: " + str(end_time - start_time) + "s")
         return distances
 
     def get_damerau_levenshtein_distances(self, tokens):
+        start_time = time.time()
         distances = -1 * np.array([[jellyfish.damerau_levenshtein_distance(w1, w2) for w1 in tokens] for w2 in tokens])
+        end_time = time.time()
+        logging.info("Damerau-Levenshtein distances computation time: " + str(end_time - start_time) + "s")
         return distances
 
     def get_jaro_distances(self, tokens):
-        distances = -1 * np.array([[jellyfish.jaro_distance(w1, w2) for w1 in tokens] for w2 in tokens])
+        start_time = time.time()
+        distances = np.array([[jellyfish.jaro_distance(w1, w2) for w1 in tokens] for w2 in tokens])
+        end_time = time.time()
+        logging.info("Jaro distances computation time: " + str(end_time - start_time) + "s")
         return distances
 
     def get_jaro_winkler_distances(self, tokens):
-        distances = -1 * np.array([[jellyfish.jaro_winkler(w1, w2) for w1 in tokens] for w2 in tokens])
+        start_time = time.time()
+        distances = np.array([[jellyfish.jaro_winkler(w1, w2) for w1 in tokens] for w2 in tokens])
+        end_time = time.time()
+        logging.info("Jaro-Winkler distances computation time: " + str(end_time - start_time) + "s")
         return distances
 
-    def get_match_rating_distances(self, tokens):
-        distances = -1 * np.array([[jellyfish.match_rating_comparison(w1, w2) for w1 in tokens] for w2 in tokens])
+    def get_jaccard_distances(self, tokens):
+        start_time = time.time()
+        jac = Jaccard(3)
+        distances = -1 * np.array([[jac.distance(w1, w2) for w1 in tokens] for w2 in tokens])
+        end_time = time.time()
+        logging.info("Jaccard distances computation time: " + str(end_time - start_time) + "s")
         return distances
-
-    def get_euclidean_distances(self, tokens):
-        vectors = self.get_vectors(tokens).values()
-        return np.array([[t1.similarity(t2) for t1 in vectors] for t2 in vectors])
-
-    # get a dictionary of vectors for the given tokens
-    def get_vectors(self, tokens):
-        # load spacy statistical model. we are interested in the word vectors; 300-dimensional vector representations
-        # of words that allow us to determine how similar they are to each other.
-        model = spacy.load('en_core_web_lg')
-        vectors = dict()
-        for token in tokens:
-            vectors[token] = self.get_vector(token, model)
-        return vectors
-
-    # get vector of the given token
-    def get_vector(self, token, model):
-        if token not in self.vectors:
-            vector = model(str(token))
-            self.vectors[token] = vector
-            return vector
-        else:
-            return self.vectors[token]
 
     # takes a collection of tokens and computes the pairwise distance between all tokens,
     # according to the specified distance metric
@@ -78,10 +76,10 @@ class StringDistance:
             distances = self.get_jaro_distances(tokens)
         elif distance_metric == Distance.JARO_WINKLER.value:
             distances = self.get_jaro_winkler_distances(tokens)
-        elif distance_metric == Distance.MATCH_RATING.value:
-            distances = self.get_match_rating_distances(tokens)
-        elif distance_metric == Distance.EUCLIDEAN.value:
-            distances = self.get_euclidean_distances(tokens)
+        elif distance_metric == Distance.JACCARD.value:
+            distances = self.get_jaccard_distances(tokens)
+        # elif distance_metric == Distance.EUCLIDEAN.value:
+        #     distances = self.get_euclidean_distances(tokens)
         else:
             raise ValueError("Unknown distance metric input: '" + distance_metric + "'. Supported values are: " +
                              str([distance.value for distance in Distance]))
