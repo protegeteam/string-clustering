@@ -96,6 +96,7 @@ def gen_onto_embedding(onto, comp, is_arr=False):
         if ccount % 10000 == 0: 
             time_elapsed = time.time()-start
             print time_elapsed, ccount
+    time_elapsed = time.time()-start
     print time_elapsed, ccount
     return np.array(onto_embeddings), all_unmapped
 
