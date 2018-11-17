@@ -20,13 +20,19 @@ class StringUtils:
         return lines
 
     @staticmethod
+    def save_list_to_file(output_file, str_list):
+        with open(output_file, 'w') as f:
+            for item in str_list:
+                f.write("%s\n" % item)
+
+    @staticmethod
     def save_dictionary_as_json(output_file, output):
         output_file = open(output_file, "w+")
         output_file.write(StringUtils.get_dictionary_as_json(output))
         output_file.close()
 
     @staticmethod
-    def save_distances_matrix(output_file, distances, tokens):
+    def save_distances(output_file, distances, tokens):
         names = [t for t in tokens]
         df = pd.DataFrame(distances, index=names, columns=names)
         df.to_csv(output_file, index=True, header=True, sep=',')
