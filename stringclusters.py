@@ -53,8 +53,8 @@ class StringClusters:
     def cluster_affinity_propagation(self, distances, tokens):
         start_time = time.time()
 
-        ap = sklearn.cluster.AffinityPropagation(affinity="precomputed", damping=0.9)
-        ap.fit(distances)
+        ap = sklearn.cluster.AffinityPropagation(affinity="precomputed", damping=0.8)
+        ap.fit(-1 * distances)  # input to affinity propagation is an array of similarities
 
         end_time = time.time()
         logging.info("Affinity propagation clustering time: " + str(end_time - start_time) + "s")
@@ -64,7 +64,7 @@ class StringClusters:
     def cluster_hdbscan(self, distances, tokens):
         start_time = time.time()
 
-        hdbscan_ = hdbscan.HDBSCAN(min_samples=15, alpha=1.0, min_cluster_size=5, metric='precomputed')
+        hdbscan_ = hdbscan.HDBSCAN(min_samples=5, alpha=1.0, min_cluster_size=2, metric='precomputed')
         hdbscan_.fit(distances.astype(np.float64))
 
         end_time = time.time()
@@ -75,8 +75,8 @@ class StringClusters:
     def cluster_dbscan(self, distances, tokens):
         start_time = time.time()
 
-        dbscan = sklearn.cluster.DBSCAN(eps=0.2, min_samples=20, metric='precomputed')
-        dbscan.fit(distances)
+        dbscan = sklearn.cluster.DBSCAN(eps=55.2, min_samples=5, metric='precomputed')
+        dbscan.fit(distances)  # input is an array of distances
 
         end_time = time.time()
         logging.info("DBSCAN clustering time: " + str(end_time - start_time) + "s")
@@ -86,8 +86,10 @@ class StringClusters:
     def cluster_meanshift(self, distances, tokens):
         start_time = time.time()
 
-        bandwidth = sklearn.cluster.estimate_bandwidth(distances)
-        meanshift = sklearn.cluster.MeanShift(bandwidth=bandwidth)
+        bandwidth = sklearn.cluster.estimate_bandwidth(distances, quantile=0.2, n_samples=50)
+        # bandwith of ~140.0 works well for all distance metrics but levenshtein(-damerau)
+        # bandwith of ~23.0 works well for levenshtein(-damerau)
+        meanshift = sklearn.cluster.MeanShift(bandwidth=bandwidth, cluster_all=True)
         meanshift.fit(distances)
 
         end_time = time.time()
@@ -111,9 +113,9 @@ class StringClusters:
             clusters[exemplar] = cluster.tolist()
         return clusters
 
-    def cluster(self, tokens, distance_metric, clustering_algorithm):
+    def cluster(self, tokens, distance_metric, clustering_algorithm, ngrams):
         tokens = np.array(list(StringNormalize().normalize_tokens(tokens)))
-        distances = StringDistance().get_distances(tokens, distance_metric)
+        distances = StringDistance().get_distances(tokens, distance_metric, ngrams)
 
         if clustering_algorithm == Algorithm.AFFINITY_PROPAGATION.value:
             clusters = self.cluster_affinity_propagation(distances, tokens)
@@ -127,8 +129,9 @@ class StringClusters:
             raise ValueError("Unknown clustering algorithm: '" + clustering_algorithm + "'. Supported values are: " +
                              str([alg.value for alg in Algorithm]))
 
-        StringUtils.save_dictionary_as_json(self.output_folder + "clusters_" + clustering_algorithm + ".json", clusters)
-        StringUtils.save_distances_matrix(self.output_folder + "distances_" + distance_metric + ".csv", distances, tokens)
+        StringUtils.save_dictionary_as_json(self.output_folder + "clusters_" + clustering_algorithm + "_" +
+                                            distance_metric + ".json", clusters)
+        StringUtils.save_distances(self.output_folder + "distances_" + distance_metric + ".csv", distances, tokens)
         return clusters
 
 
@@ -147,11 +150,14 @@ def get_arguments():
                              "to the current directory")
     parser.add_argument("-d", "--distance_metric", required=False, type=str, default=Distance.LEVENSHTEIN,
                         help="Distance metric (levenshtein | damerau | jaro | winkler | match_rating | euclidean). "
-                             "By default uses Levenshtein distance ('levenshtein')")
+                             "Default: Levenshtein distance ('levenshtein')")
     parser.add_argument("-c", "--clustering", required=False, type=str, default=Algorithm.AFFINITY_PROPAGATION,
                         help="Clustering algorithm (ap | ms | dbscan | hbscan). "
                              "Supported algorithms are: affinity propagation (ap), mean shift (ms), DBSCAN (dbscan),"
-                             "and HDBSCAN (hdbscan). By default uses affinity propagation ('ap')")
+                             "and HDBSCAN (hdbscan). Default: affinity propagation ('ap')")
+    parser.add_argument("-n", "--ngrams", required=False, type=int, default=4,
+                        help="Number of characters 'n' for n-grams based algorithms, which work by converting strings "
+                             "into sets of n-grams (sequences of n characters). Default: 4.")
     arguments = parser.parse_args()
 
     if not os.path.exists(arguments.input_file):
@@ -162,10 +168,10 @@ def get_arguments():
     if os.path.dirname(arguments.output_file):
         os.makedirs(os.path.dirname(arguments.output_file), exist_ok=True)
 
-    return arguments.input_file, arguments.output_file, arguments.distance_metric, arguments.clustering
+    return arguments.input_file, arguments.output_file, arguments.distance_metric, arguments.clustering, arguments.ngrams
 
 
 if __name__ == "__main__":
     args = get_arguments()
     strings = StringUtils.parse_file(args[0])
-    StringClusters(args[1]).cluster(strings, args[2], args[3])
+    StringClusters(args[1]).cluster(strings, args[2], args[3], args[4])

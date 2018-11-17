@@ -7,9 +7,8 @@ from enum import Enum
 
 import jellyfish
 import numpy as np
-from gensim.models import Word2Vec, KeyedVectors
+from similarity.cosine import Cosine
 from similarity.jaccard import Jaccard
-from stringutils import StringUtils
 
 __author__ = "Rafael Gonçalves, Stanford University"
 
@@ -20,6 +19,7 @@ class Distance(Enum):
     JARO = 'jaro'
     JARO_WINKLER = 'winkler'
     JACCARD = 'jaccard'
+    COSINE = 'cosine'
     EUCLIDEAN = 'euclidean'
 
 
@@ -31,43 +31,53 @@ class StringDistance:
 
     def get_levenshtein_distances(self, tokens):
         start_time = time.time()
-        distances = -1 * np.array([[jellyfish.levenshtein_distance(w1, w2) for w1 in tokens] for w2 in tokens])
+        distances = np.array([[jellyfish.levenshtein_distance(w1, w2) for w1 in tokens] for w2 in tokens])
         end_time = time.time()
         logging.info("Levenshtein distances computation time: " + str(end_time - start_time) + "s")
         return distances
 
     def get_damerau_levenshtein_distances(self, tokens):
         start_time = time.time()
-        distances = -1 * np.array([[jellyfish.damerau_levenshtein_distance(w1, w2) for w1 in tokens] for w2 in tokens])
+        distances = np.array([[jellyfish.damerau_levenshtein_distance(w1, w2) for w1 in tokens] for w2 in tokens])
         end_time = time.time()
         logging.info("Damerau-Levenshtein distances computation time: " + str(end_time - start_time) + "s")
         return distances
 
+    # returns a percentage. 0 represents completely different strings, 1 represents an exact match
     def get_jaro_distances(self, tokens):
         start_time = time.time()
-        distances = np.array([[jellyfish.jaro_distance(w1, w2) for w1 in tokens] for w2 in tokens])
+        distances = 100*(1-np.array([[jellyfish.jaro_distance(w1, w2) for w1 in tokens] for w2 in tokens]))
         end_time = time.time()
         logging.info("Jaro distances computation time: " + str(end_time - start_time) + "s")
         return distances
 
+    # returns a percentage. 0 represents completely different strings, 1 represents an exact match
     def get_jaro_winkler_distances(self, tokens):
         start_time = time.time()
-        distances = np.array([[jellyfish.jaro_winkler(w1, w2) for w1 in tokens] for w2 in tokens])
+        distances = 100*(1-np.array([[jellyfish.jaro_winkler(w1, w2) for w1 in tokens] for w2 in tokens]))
         end_time = time.time()
         logging.info("Jaro-Winkler distances computation time: " + str(end_time - start_time) + "s")
         return distances
 
-    def get_jaccard_distances(self, tokens):
+    def get_jaccard_distances(self, tokens, ngrams):
         start_time = time.time()
-        jac = Jaccard(3)
-        distances = -1 * np.array([[jac.distance(w1, w2) for w1 in tokens] for w2 in tokens])
+        jac = Jaccard(ngrams)
+        distances = 100*np.array([[jac.distance(w1, w2) for w1 in tokens] for w2 in tokens])
         end_time = time.time()
         logging.info("Jaccard distances computation time: " + str(end_time - start_time) + "s")
         return distances
 
+    def get_cosine_distances(self, tokens, ngrams):
+        start_time = time.time()
+        cos = Cosine(ngrams)
+        distances = 100*np.array([[cos.distance(w1, w2) for w1 in tokens] for w2 in tokens])
+        end_time = time.time()
+        logging.info("Cosine distances computation time: " + str(end_time - start_time) + "s")
+        return distances
+
     # takes a collection of tokens and computes the pairwise distance between all tokens,
     # according to the specified distance metric
-    def get_distances(self, tokens, distance_metric):
+    def get_distances(self, tokens, distance_metric, ngrams):
         if distance_metric == Distance.LEVENSHTEIN.value:
             distances = self.get_levenshtein_distances(tokens)
         elif distance_metric == Distance.DAMERAU_LEVENSHTEIN.value:
@@ -77,7 +87,9 @@ class StringDistance:
         elif distance_metric == Distance.JARO_WINKLER.value:
             distances = self.get_jaro_winkler_distances(tokens)
         elif distance_metric == Distance.JACCARD.value:
-            distances = self.get_jaccard_distances(tokens)
+            distances = self.get_jaccard_distances(tokens, ngrams)
+        elif distance_metric == Distance.COSINE.value:
+            distances = self.get_cosine_distances(tokens, ngrams)
         # elif distance_metric == Distance.EUCLIDEAN.value:
         #     distances = self.get_euclidean_distances(tokens)
         else:
