@@ -57,7 +57,7 @@ class StringClusters:
         ap.fit(-1 * distances)  # input to affinity propagation is an array of similarities
 
         end_time = time.time()
-        logging.info("Affinity propagation clustering time: " + str(end_time - start_time) + "s")
+        logging.info("Affinity propagation clustering time: " + str(round(end_time-start_time, 2)) + " seconds")
         return self.build_ap_cluster_dictionary(ap.labels_, tokens, ap.cluster_centers_indices_)
 
     # HDBSCAN clustering
@@ -68,7 +68,7 @@ class StringClusters:
         hdbscan_.fit(distances.astype(np.float64))
 
         end_time = time.time()
-        logging.info("HDBSCAN clustering time: " + str(end_time-start_time) + "s")
+        logging.info("HDBSCAN clustering time: " + str(round(end_time-start_time, 2)) + " seconds")
         return self.build_cluster_dictionary(hdbscan_.labels_, tokens)
 
     # DBSCAN clustering
@@ -80,7 +80,7 @@ class StringClusters:
         dbscan.fit(distances)  # input is an array of distances
 
         end_time = time.time()
-        logging.info("DBSCAN clustering time: " + str(end_time - start_time) + "s")
+        logging.info("DBSCAN clustering time: " + str(round(end_time-start_time, 2)) + " seconds")
         return self.build_cluster_dictionary(dbscan.labels_, tokens)
 
     def get_eps_dbscan(self, distance):
@@ -108,7 +108,7 @@ class StringClusters:
         meanshift.fit(distances)
 
         end_time = time.time()
-        logging.info("Mean shift clustering time: " + str(end_time - start_time) + "s")
+        logging.info("Mean shift clustering time: " + str(round(end_time-start_time, 2)) + " seconds")
         return self.build_cluster_dictionary(meanshift.labels_, tokens)
 
     def build_cluster_dictionary(self, labels, tokens):

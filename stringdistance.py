@@ -33,14 +33,14 @@ class StringDistance:
         start_time = time.time()
         distances = np.array([[jellyfish.levenshtein_distance(w1, w2) for w1 in tokens] for w2 in tokens])
         end_time = time.time()
-        logging.info("Levenshtein distances computation time: " + str(end_time - start_time) + "s")
+        logging.info("Levenshtein distances computation time: " + str(round(end_time-start_time, 2)) + " seconds")
         return distances
 
     def get_damerau_levenshtein_distances(self, tokens):
         start_time = time.time()
         distances = np.array([[jellyfish.damerau_levenshtein_distance(w1, w2) for w1 in tokens] for w2 in tokens])
         end_time = time.time()
-        logging.info("Damerau-Levenshtein distances computation time: " + str(end_time - start_time) + "s")
+        logging.info("Damerau-Levenshtein distances computation time: " + str(round(end_time-start_time, 2)) + " seconds")
         return distances
 
     # returns a percentage. 0 represents completely different strings, 1 represents an exact match
@@ -48,7 +48,7 @@ class StringDistance:
         start_time = time.time()
         distances = 100*(1-np.array([[jellyfish.jaro_distance(w1, w2) for w1 in tokens] for w2 in tokens]))
         end_time = time.time()
-        logging.info("Jaro distances computation time: " + str(end_time - start_time) + "s")
+        logging.info("Jaro distances computation time: " + str(round(end_time-start_time, 2)) + " seconds")
         return distances
 
     # returns a percentage. 0 represents completely different strings, 1 represents an exact match
@@ -56,7 +56,7 @@ class StringDistance:
         start_time = time.time()
         distances = 100*(1-np.array([[jellyfish.jaro_winkler(w1, w2) for w1 in tokens] for w2 in tokens]))
         end_time = time.time()
-        logging.info("Jaro-Winkler distances computation time: " + str(end_time - start_time) + "s")
+        logging.info("Jaro-Winkler distances computation time: " + str(round(end_time-start_time, 2)) + " seconds")
         return distances
 
     def get_jaccard_distances(self, tokens, ngrams):
@@ -64,7 +64,7 @@ class StringDistance:
         jac = Jaccard(ngrams)
         distances = 100*np.array([[jac.distance(w1, w2) for w1 in tokens] for w2 in tokens])
         end_time = time.time()
-        logging.info("Jaccard distances computation time: " + str(end_time - start_time) + "s")
+        logging.info("Jaccard distances computation time: " + str(round(end_time-start_time, 2)) + " seconds")
         return distances
 
     def get_cosine_distances(self, tokens, ngrams):
@@ -72,7 +72,7 @@ class StringDistance:
         cos = Cosine(ngrams)
         distances = 100*np.array([[cos.distance(w1, w2) for w1 in tokens] for w2 in tokens])
         end_time = time.time()
-        logging.info("Cosine distances computation time: " + str(end_time - start_time) + "s")
+        logging.info("Cosine distances computation time: " + str(round(end_time-start_time, 2)) + " seconds")
         return distances
 
     # takes a collection of tokens and computes the pairwise distance between all tokens,
