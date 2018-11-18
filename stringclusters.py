@@ -72,15 +72,30 @@ class StringClusters:
         return self.build_cluster_dictionary(hdbscan_.labels_, tokens)
 
     # DBSCAN clustering
-    def cluster_dbscan(self, distances, tokens):
+    def cluster_dbscan(self, distances, tokens, distance):
         start_time = time.time()
 
-        dbscan = sklearn.cluster.DBSCAN(eps=55.2, min_samples=5, metric='precomputed')
+        eps = self.get_eps_dbscan(distance)
+        dbscan = sklearn.cluster.DBSCAN(eps=eps, min_samples=2, metric='precomputed')
         dbscan.fit(distances)  # input is an array of distances
 
         end_time = time.time()
         logging.info("DBSCAN clustering time: " + str(end_time - start_time) + "s")
         return self.build_cluster_dictionary(dbscan.labels_, tokens)
+
+    def get_eps_dbscan(self, distance):
+        # eps of ~16.0 works well for jaro(-winkler) distances
+        if distance == Distance.JARO.value or distance == Distance.JARO_WINKLER.value:
+            eps = 16.0
+        # eps of ~40.0 works well for jaccard and cosine distances
+        elif distance == Distance.JACCARD.value or distance == Distance.COSINE.value:
+            eps = 40.0
+        # eps of ~3.0 works well for levenshtein(-damerau) distances
+        elif distance == Distance.LEVENSHTEIN.value or distance == Distance.DAMERAU_LEVENSHTEIN.value:
+            eps = 3.0
+        else:
+            eps = 0.5
+        return eps
 
     # MeanShift clustering
     def cluster_meanshift(self, distances, tokens):
@@ -120,7 +135,7 @@ class StringClusters:
         if clustering_algorithm == Algorithm.AFFINITY_PROPAGATION.value:
             clusters = self.cluster_affinity_propagation(distances, tokens)
         elif clustering_algorithm == Algorithm.DBSCAN.value:
-            clusters = self.cluster_dbscan(distances, tokens)
+            clusters = self.cluster_dbscan(distances, tokens, distance_metric)
         elif clustering_algorithm == Algorithm.HDBSCAN.value:
             clusters = self.cluster_hdbscan(distances, tokens)
         elif clustering_algorithm == Algorithm.MEAN_SHIFT.value:

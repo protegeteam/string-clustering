@@ -12,7 +12,7 @@ output=./cluster_output_$timestamp/
 distances=('levenshtein' 'damerau' 'jaro' 'winkler' 'jaccard' 'cosine')
 
 # clustering methods
-clustering=('ap' 'ms' 'hdbscan')
+clustering=('ap' 'ms' 'dbscan' 'hdbscan')
 
 # n for n-grams based distance metrics
 ngrams=4
