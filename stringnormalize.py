@@ -26,7 +26,7 @@ class StringNormalize:
         token = self.pattern.sub(' ', token)
         token = self.parse_camel_case(token)
         token = re.sub('\s+', ' ', token)
-        return token.strip()
+        return self.to_ascii(token).strip()
 
     def parse_camel_case(self, name):
         s1 = self.first_cap_re.sub(r'\1_\2', name)
@@ -34,3 +34,6 @@ class StringNormalize:
         pparts = re.split("[-_]", s2)
         name = " ".join([x.title() for x in pparts])
         return name.lower()
+
+    def to_ascii(self, string):
+        return string.encode("ascii", errors="ignore").decode()
