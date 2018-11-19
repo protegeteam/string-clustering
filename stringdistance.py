@@ -20,13 +20,11 @@ class Distance(Enum):
     JARO_WINKLER = 'winkler'
     JACCARD = 'jaccard'
     COSINE = 'cosine'
-    EUCLIDEAN = 'euclidean'
 
 
 class StringDistance:
 
     def __init__(self):
-        self.vectors = dict()
         logging.basicConfig(level=logging.INFO)
 
     def get_levenshtein_distances(self, tokens):
@@ -90,8 +88,6 @@ class StringDistance:
             distances = self.get_jaccard_distances(tokens, ngrams)
         elif distance_metric == Distance.COSINE.value:
             distances = self.get_cosine_distances(tokens, ngrams)
-        # elif distance_metric == Distance.EUCLIDEAN.value:
-        #     distances = self.get_euclidean_distances(tokens)
         else:
             raise ValueError("Unknown distance metric input: '" + distance_metric + "'. Supported values are: " +
                              str([distance.value for distance in Distance]))
