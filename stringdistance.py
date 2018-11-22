@@ -6,9 +6,9 @@ import time
 from enum import Enum
 
 import jellyfish
+import nltk
 import numpy as np
 from similarity.cosine import Cosine
-from similarity.jaccard import Jaccard
 
 __author__ = "Rafael Gonçalves, Stanford University"
 
@@ -44,7 +44,7 @@ class StringDistance:
     # returns a percentage. 0 represents completely different strings, 1 represents an exact match
     def get_jaro_distances(self, tokens):
         start_time = time.time()
-        distances = 100*(1-np.array([[jellyfish.jaro_distance(w1, w2) for w1 in tokens] for w2 in tokens]))
+        distances = np.array([[int(100*(1-jellyfish.jaro_distance(w1, w2))) for w1 in tokens] for w2 in tokens])
         end_time = time.time()
         logging.info("Jaro distances computation time: " + str(round(end_time-start_time, 2)) + " seconds")
         return distances
@@ -52,15 +52,14 @@ class StringDistance:
     # returns a percentage. 0 represents completely different strings, 1 represents an exact match
     def get_jaro_winkler_distances(self, tokens):
         start_time = time.time()
-        distances = 100*(1-np.array([[jellyfish.jaro_winkler(w1, w2) for w1 in tokens] for w2 in tokens]))
+        distances = np.array([[int(100*(1-jellyfish.jaro_winkler(w1, w2))) for w1 in tokens] for w2 in tokens])
         end_time = time.time()
         logging.info("Jaro-Winkler distances computation time: " + str(round(end_time-start_time, 2)) + " seconds")
         return distances
 
-    def get_jaccard_distances(self, tokens, ngrams):
+    def get_jaccard_distances(self, tokens):
         start_time = time.time()
-        jac = Jaccard(ngrams)
-        distances = 100*np.array([[jac.distance(w1, w2) for w1 in tokens] for w2 in tokens])
+        distances = np.array([[int(100*nltk.jaccard_distance(set(w1), set(w2))) for w1 in tokens] for w2 in tokens])
         end_time = time.time()
         logging.info("Jaccard distances computation time: " + str(round(end_time-start_time, 2)) + " seconds")
         return distances
@@ -68,7 +67,7 @@ class StringDistance:
     def get_cosine_distances(self, tokens, ngrams):
         start_time = time.time()
         cos = Cosine(ngrams)
-        distances = 100*np.array([[cos.distance(w1, w2) for w1 in tokens] for w2 in tokens])
+        distances = np.array([[int(100*cos.distance(w1, w2)) for w1 in tokens] for w2 in tokens])
         end_time = time.time()
         logging.info("Cosine distances computation time: " + str(round(end_time-start_time, 2)) + " seconds")
         return distances
@@ -85,7 +84,7 @@ class StringDistance:
         elif distance_metric == Distance.JARO_WINKLER.value:
             distances = self.get_jaro_winkler_distances(tokens)
         elif distance_metric == Distance.JACCARD.value:
-            distances = self.get_jaccard_distances(tokens, ngrams)
+            distances = self.get_jaccard_distances(tokens)
         elif distance_metric == Distance.COSINE.value:
             distances = self.get_cosine_distances(tokens, ngrams)
         else:
