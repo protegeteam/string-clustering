@@ -64,7 +64,7 @@ class StringClusters:
     def cluster_hdbscan(self, distances, tokens):
         start_time = time.time()
 
-        hdbscan_ = hdbscan.HDBSCAN(min_samples=5, alpha=1.0, min_cluster_size=2, metric='precomputed')
+        hdbscan_ = hdbscan.HDBSCAN(min_samples=6, min_cluster_size=2, metric='precomputed')
         hdbscan_.fit(distances.astype(np.float64))
 
         end_time = time.time()
@@ -84,9 +84,9 @@ class StringClusters:
         return self.build_cluster_dictionary(dbscan.labels_, tokens)
 
     def get_eps_dbscan(self, distance):
-        # eps of ~16.0 works well for jaro(-winkler) distances
+        # eps of ~13.0 works well for jaro(-winkler) distances
         if distance == Distance.JARO.value or distance == Distance.JARO_WINKLER.value:
-            eps = 16.0
+            eps = 13.0
         # eps of ~40.0 works well for jaccard and cosine distances
         elif distance == Distance.JACCARD.value or distance == Distance.COSINE.value:
             eps = 40.0
@@ -144,8 +144,10 @@ class StringClusters:
             raise ValueError("Unknown clustering algorithm: '" + clustering_algorithm + "'. Supported values are: " +
                              str([alg.value for alg in Algorithm]))
 
+        logging.info("Saving clusters dictionary...")
         StringUtils.save_dictionary_as_json(self.output_folder + "clusters_" + clustering_algorithm + "_" +
                                             distance_metric + ".json", clusters)
+        logging.info("Saving distances matrix...")
         StringUtils.save_distances(self.output_folder + "distances_" + distance_metric + ".csv", distances, tokens)
         return clusters
 
