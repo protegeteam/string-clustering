@@ -89,7 +89,7 @@ class StringClusters:
             eps = 13.0
         # eps of ~40.0 works well for jaccard and cosine distances
         elif distance == Distance.JACCARD.value or distance == Distance.COSINE.value:
-            eps = 40.0
+            eps = 52.0
         # eps of ~3.0 works well for levenshtein(-damerau) distances
         elif distance == Distance.LEVENSHTEIN.value or distance == Distance.DAMERAU_LEVENSHTEIN.value:
             eps = 3.0
