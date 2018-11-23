@@ -3,3 +3,6 @@ test*
 __pycache__
 *.npy
 *.bin
+*.bz2
+cluster_output*
+jupyter-test/*
