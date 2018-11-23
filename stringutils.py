@@ -20,6 +20,12 @@ class StringUtils:
         return lines
 
     @staticmethod
+    def parse_cluster_dict(cluster_dict):
+        with open(cluster_dict) as f:
+            data = json.load(f)
+        return data
+
+    @staticmethod
     def save_list_to_file(output_file, str_list):
         with open(output_file, 'w') as f:
             for item in str_list:
