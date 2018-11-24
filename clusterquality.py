@@ -12,7 +12,7 @@ __author__ = "Rafael Gonçalves, Stanford University"
 class ClusterQuality:
 
     def __init__(self, out_file, bp_ap_key):
-        self.file_writer = open(out_file, 'a')
+        self.file_writer = open(out_file, 'w')
         self.bp_ap_key = bp_ap_key
 
     def verify(self, cluster_dict):
@@ -29,10 +29,10 @@ class ClusterQuality:
 
 
 if __name__ == "__main__":
-    clusters_file_path = sys.argv[0]  # JSON file
+    clusters_file_path = sys.argv[1]  # JSON file
     clusters_file = StringUtils.parse_cluster_dict(clusters_file_path)
 
-    output_file = sys.argv[1]  # Output file path
-    bioportal_api_key = sys.argv[2]  # BioPortal API key
+    output_file = sys.argv[2]  # Output file path
+    bioportal_api_key = sys.argv[3]  # BioPortal API key
     cq = ClusterQuality(output_file, bioportal_api_key)
     cq.verify(clusters_file)
