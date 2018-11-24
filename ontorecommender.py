@@ -47,7 +47,8 @@ class OntoRecommender:
 
                 return ont_acr, ont_id, cov_score, cov_score_norm, cov_terms, cov_words
             else:
-                logging.error("Empty response from Ontology Recommender: No ontologies were found.")
+                logging.debug("Empty response from Ontology Recommender: No ontologies were found for input: " +
+                              input_str + ".")
                 return '', '', '', '', '', ''
         else:
             # if response code is not OK (200), print the resulting HTTP error code and description
