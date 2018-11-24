@@ -17,12 +17,12 @@ class ClusterQuality:
 
     def verify(self, cluster_dict):
         recommender = OntoRecommender(self.bp_ap_key)
-        nr_clusters = str(len(cluster_dict))
         for cluster in cluster_dict:
             clust_elements = cluster_dict[cluster]
+            nr_clust_elements = str(len(clust_elements))
             csv_clust_elements = ",".join(clust_elements)  # string with comma-separated list of cluster elements
             ont_acr, ont_id, cov_score, cov_score_norm, cov_terms, cov_words = recommender.recommend(csv_clust_elements)
-            self.file_writer.write(str(cluster) + "," + nr_clusters + ",")
+            self.file_writer.write(str(cluster) + "," + nr_clust_elements + ",")
             self.file_writer.write(ont_acr + "," + ont_id + "," + str(cov_score) + "," + str(cov_score_norm) + "," +
                                    str(cov_terms) + "," + str(cov_words) + "\n")
         self.file_writer.close()
