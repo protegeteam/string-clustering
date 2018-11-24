@@ -87,9 +87,9 @@ class StringClusters:
         # eps of ~13.0 works well for jaro(-winkler) distances
         if distance == Distance.JARO.value or distance == Distance.JARO_WINKLER.value:
             eps = 13.0
-        # eps of ~40.0 works well for jaccard and cosine distances
-        elif distance == Distance.JACCARD.value or distance == Distance.COSINE.value:
-            eps = 52.0
+        # eps of ~10.0 works well for jaccard distance
+        elif distance == Distance.JACCARD.value:
+            eps = 10.0
         # eps of ~3.0 works well for levenshtein(-damerau) distances
         elif distance == Distance.LEVENSHTEIN.value or distance == Distance.DAMERAU_LEVENSHTEIN.value:
             eps = 3.0
@@ -166,7 +166,7 @@ def get_arguments():
                         help="Output file. By default saves as 'stringclusters_output.json' with a creation timestamp, "
                              "to the current directory")
     parser.add_argument("-d", "--distance_metric", required=False, type=str, default=Distance.LEVENSHTEIN,
-                        help="Distance metric (levenshtein | damerau | jaro | winkler | match_rating | euclidean). "
+                        help="Distance metric (levenshtein | damerau | jaro | winkler | jaccard). "
                              "Default: Levenshtein distance ('levenshtein')")
     parser.add_argument("-c", "--clustering", required=False, type=str, default=Algorithm.AFFINITY_PROPAGATION,
                         help="Clustering algorithm (ap | ms | dbscan | hbscan). "
