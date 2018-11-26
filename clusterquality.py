@@ -59,5 +59,9 @@ if __name__ == "__main__":
     bioportal_api_key = sys.argv[3]  # BioPortal API key
     cq = ClusterQuality(output_file, bioportal_api_key)
 
-    use_keyword_input = bool(util.strtobool(sys.argv[4]))  # True=keyword-based input, False=Raw text input
+    if len(sys.argv) > 4:
+        use_keyword_input = bool(util.strtobool(sys.argv[4]))  # True=keyword-based input, False=Raw text input
+    else:
+        use_keyword_input = False
+
     cq.verify(clusters_file, keyword_input=use_keyword_input)
