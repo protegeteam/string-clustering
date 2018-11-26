@@ -14,7 +14,8 @@ __author__ = "Rafael Gonçalves, Stanford University"
 class ClusterQuality:
 
     def __init__(self, out_file, bp_ap_key):
-        self.file_writer = open(out_file, 'w')
+        self.qa_file = open(out_file, 'w')
+        self.wc_file = open(out_file + "_word_counts.csv", 'w')
         self.bp_ap_key = bp_ap_key
         logging.basicConfig(level=logging.INFO)
 
@@ -31,16 +32,21 @@ class ClusterQuality:
                 clust_elements = random.sample(clust_elements, 150)
 
             if keyword_input:
-                csv_clust_elements = ",".join(clust_elements)
+                str_clust_elements = ",".join(clust_elements)
+                nr_terms = len(clust_elements)
+                nr_words = sum(len(x.split()) for x in clust_elements)
             else:
                 set_clust_elements = set(clust_elements)
-                csv_clust_elements = " ".join(set_clust_elements)
+                str_clust_elements = " ".join(set_clust_elements)
+                nr_terms = nr_words = len(set_clust_elements)
 
-            ont_acr, ont_id, cov_score, cov_score_norm, cov_terms, cov_words = recommender.recommend(csv_clust_elements, keyword_input)
-            self.file_writer.write(str(cluster) + "," + str(nr_clust_elements) + ",")
-            self.file_writer.write(ont_acr + "," + ont_id + "," + str(cov_score) + "," + str(cov_score_norm) + "," +
-                                   str(cov_terms) + "," + str(cov_words) + "\n")
-        self.file_writer.close()
+            ont_acr, ont_id, cov_score, cov_score_norm, cov_terms, cov_words = recommender.recommend(str_clust_elements, keyword_input)
+            self.qa_file.write(str(cluster) + "," + str(nr_clust_elements) + ",")
+            self.qa_file.write(ont_acr + "," + ont_id + "," + str(cov_score) + "," + str(cov_score_norm) + "," +
+                               str(cov_terms) + "," + str(cov_words) + "\n")
+            self.wc_file.write(str(cluster) + "," + str(nr_clust_elements) + "," + str(nr_terms) + "," + str(nr_words) + "\n")
+        self.qa_file.close()
+        self.wc_file.close()
 
     def tokenize_str_array(self, array):
         output = []
