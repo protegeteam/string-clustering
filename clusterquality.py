@@ -16,7 +16,7 @@ class ClusterQuality:
     def __init__(self, out_file, bp_ap_key):
         self.file_writer = open(out_file, 'w')
         self.bp_ap_key = bp_ap_key
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.INFO)
 
     def verify(self, cluster_dict, keyword_input=False):
         recommender = OntoRecommender(self.bp_ap_key)
@@ -33,7 +33,8 @@ class ClusterQuality:
             if keyword_input:
                 csv_clust_elements = ",".join(clust_elements)
             else:
-                csv_clust_elements = " ".join(clust_elements)
+                set_clust_elements = set(clust_elements)
+                csv_clust_elements = " ".join(set_clust_elements)
 
             ont_acr, ont_id, cov_score, cov_score_norm, cov_terms, cov_words = recommender.recommend(csv_clust_elements, keyword_input)
             self.file_writer.write(str(cluster) + "," + str(nr_clust_elements) + ",")

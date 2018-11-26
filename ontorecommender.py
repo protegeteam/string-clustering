@@ -13,7 +13,7 @@ class OntoRecommender:
     def __init__(self, bp_api_key):
         self.url = "http://data.bioontology.org/recommender"
         self.bp_api_key = bp_api_key
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.INFO)
 
     def recommend(self, input_str, keyword_input=False):
         if keyword_input:
@@ -52,8 +52,8 @@ class OntoRecommender:
 
                 return ont_acr, ont_id, cov_score, cov_score_norm, cov_terms, cov_words
             else:
-                logging.debug("Empty response from Ontology Recommender: No ontologies were found for input: " +
-                              input_str + ".")
+                logging.info("Empty response from Ontology Recommender: No ontologies were found for input: " +
+                             input_str + ".")
                 return '', '', '', '', '', ''
         else:
             logging.error("Bad response: " + response.reason + " for URL:\n" + response.url)
