@@ -54,6 +54,8 @@ class OntoRecommender:
             else:
                 logging.info("Empty response from Ontology Recommender: No ontologies were found for input: " +
                              input_str + ".")
-                return '', '', '', '', '', ''
+                return 'None', '', '', '', '', ''
         else:
-            logging.error("Bad response: " + response.reason + " for URL:\n" + response.url)
+            logging.error("Bad response: " + response.reason + " for input: " + input_str + ".\n\tRequest URL: " +
+                          response.url + "\n\tResponse: " + str(response))
+            return 'Error', '', '', '', '', ''
