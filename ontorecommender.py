@@ -13,15 +13,21 @@ class OntoRecommender:
     def __init__(self, bp_api_key):
         self.url = "http://data.bioontology.org/recommender"
         self.bp_api_key = bp_api_key
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG)
 
-    def recommend(self, input_str):
+    def recommend(self, input_str, keyword_input=False):
+        if keyword_input:
+            input_type = 2  # 2=comma-separated list of keywords
+        else:
+            input_type = 1  # 1=text
+            input_str = "{" + input_str + "}"
+
         headers = {
             "Authorization": "apiKey token=" + self.bp_api_key,
         }
         params = {
             "input": input_str,
-            "input_type": 2,  # 2=comma-separated list of keywords
+            "input_type": input_type,
             "output_type": 1,  # 1=ranked list of ontologies
             "wc": 0.8,
             "wa": 0.0,
@@ -29,7 +35,6 @@ class OntoRecommender:
             "wd": 0.0
         }
         response = requests.get(self.url, params=params, headers=headers, verify=True)
-
         if response.ok:
             json_resp = json.loads(response.content)
             if len(json_resp) > 0:
@@ -51,5 +56,4 @@ class OntoRecommender:
                               input_str + ".")
                 return '', '', '', '', '', ''
         else:
-            # if response code is not OK (200), print the resulting HTTP error code and description
-            response.raise_for_status()
+            logging.error("Bad response: " + response.reason + " for URL:\n" + response.url)
