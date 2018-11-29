@@ -38,24 +38,35 @@ class OntoRecommender:
         if response.ok:
             json_resp = json.loads(response.content)
             if len(json_resp) > 0:
-                # get ontology details
-                ont = json_resp[0]['ontologies']
-                ont_acr = ont[0]['acronym']
-                ont_id = ont[0]['@id']
+                best_ont_acr, best_ont_id = None, None
+                best_cov_score, best_cov_score_norm, best_cov_terms, best_cov_words = 0, 0, 0, 0
+                for recommendation in json_resp:
+                    # get ontology details
+                    ont = recommendation['ontologies']
+                    ont_acr = ont[0]['acronym']
+                    ont_id = ont[0]['@id']
 
-                # get coverage score and terms covered
-                coverage = json_resp[0]['coverageResult']
-                cov_score = coverage['score']
-                cov_score_norm = coverage['normalizedScore']
-                cov_terms = coverage['numberTermsCovered']
-                cov_words = coverage['numberWordsCovered']
+                    # get coverage score and terms covered
+                    coverage = recommendation['coverageResult']
+                    cov_score = coverage['score']
+                    cov_terms = coverage['numberTermsCovered']
+                    cov_words = coverage['numberWordsCovered']
+                    cov_score_norm = coverage['normalizedScore']
 
-                return ont_acr, ont_id, cov_score, cov_score_norm, cov_terms, cov_words
+                    if cov_score >= best_cov_score and (cov_terms > best_cov_terms or cov_words > best_cov_words):
+                        best_ont_acr = ont_acr
+                        best_ont_id = ont_id
+                        best_cov_score = cov_score
+                        best_cov_score_norm = cov_score_norm
+                        best_cov_terms = cov_terms
+                        best_cov_words = cov_words
+
+                return best_ont_acr, best_ont_id, best_cov_score, best_cov_score_norm, best_cov_terms, best_cov_words
             else:
                 logging.info("Empty response from Ontology Recommender: No ontologies were found for input: " +
                              input_str + ".")
-                return 'None', '', '', '', '', ''
+                return '', '', '', '', '', ''
         else:
             logging.error("Bad response: " + response.reason + " for input: " + input_str + ".\n\tRequest URL: " +
                           response.url + "\n\tResponse: " + str(response))
-            return 'Error', '', '', '', '', ''
+            return '', '', '', '', '', ''
