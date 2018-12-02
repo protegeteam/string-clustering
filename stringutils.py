@@ -26,8 +26,8 @@ class StringUtils:
         return data
 
     @staticmethod
-    def save_list_to_file(output_file, str_list):
-        with open(output_file, 'w') as f:
+    def save_list_to_file(output_file, str_list, mode='w'):
+        with open(output_file, mode) as f:
             for item in str_list:
                 f.write("%s\n" % item)
 
