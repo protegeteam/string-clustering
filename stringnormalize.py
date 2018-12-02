@@ -12,6 +12,7 @@ class StringNormalize:
         self.pattern = re.compile('([^\s\w]|_)+')
         self.first_cap_re = re.compile('(.)([A-Z][a-z]+)')
         self.all_cap_re = re.compile('([a-z0-9])([A-Z])')
+        self.numbers_re = re.compile('[0-9]+')
 
     def normalize_tokens(self, tokens):
         normalized_tokens = set()
@@ -25,6 +26,7 @@ class StringNormalize:
     def normalize(self, token):
         token = self.pattern.sub(' ', token)
         token = self.parse_camel_case(token)
+        token = self.numbers_re.sub('', token)
         token = re.sub('\s+', ' ', token)
         return self.to_ascii(token).strip()
 
