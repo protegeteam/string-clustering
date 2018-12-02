@@ -18,7 +18,7 @@ class StringNormalize:
         normalized_tokens = set()
         for token in tokens:
             normalized_token = self.normalize(token)
-            if normalized_token != "":
+            if normalized_token != "" and len("".join(normalized_token.split())) > 3:
                 normalized_tokens.add(normalized_token)
         return normalized_tokens
 
@@ -27,8 +27,9 @@ class StringNormalize:
         token = self.pattern.sub(' ', token)
         token = self.parse_camel_case(token)
         token = self.numbers_re.sub('', token)
-        token = re.sub('\s+', ' ', token)
-        return self.to_ascii(token).strip()
+        token = self.to_ascii(token)
+        token = re.sub('\s+', ' ', token).strip()
+        return token
 
     def parse_camel_case(self, name):
         s1 = self.first_cap_re.sub(r'\1_\2', name)
