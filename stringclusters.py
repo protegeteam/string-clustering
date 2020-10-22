@@ -23,6 +23,7 @@ import logging
 import os
 import sys
 import time
+import pandas as pd
 from enum import Enum
 
 import hdbscan
@@ -148,8 +149,13 @@ class StringClusters:
         StringUtils.save_dictionary_as_json(self.output_folder + "clusters_" + clustering_algorithm + "_" +
                                             distance_metric + ".json", clusters)
         logging.info("Saving distances matrix...")
-        StringUtils.save_distances(self.output_folder + "distances_" + distance_metric + ".csv", distances, tokens)
+        self.save_distances(self.output_folder + "distances_" + distance_metric + ".csv", distances, tokens)
         return clusters
+
+    def save_distances(self, output_file, distances, tokens):
+        names = [t for t in tokens]
+        df = pd.DataFrame(distances, index=names, columns=names)
+        df.to_csv(output_file, index=True, header=True, sep=',')
 
 
 # Use arparse to get command line arguments

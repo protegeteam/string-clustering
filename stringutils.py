@@ -2,7 +2,7 @@
 """Provides StringUtils class"""
 
 import json
-import pandas as pd
+import re
 
 __author__ = "Rafael Gonçalves, Stanford University"
 
@@ -32,16 +32,15 @@ class StringUtils:
                 f.write("%s\n" % item)
 
     @staticmethod
+    def save_line_to_file(output_file, line, mode='w'):
+        with open(output_file, mode) as f:
+            f.write(line + '\n')
+
+    @staticmethod
     def save_dictionary_as_json(output_file, output):
         output_file = open(output_file, "w+")
         output_file.write(StringUtils.get_dictionary_as_json(output))
         output_file.close()
-
-    @staticmethod
-    def save_distances(output_file, distances, tokens):
-        names = [t for t in tokens]
-        df = pd.DataFrame(distances, index=names, columns=names)
-        df.to_csv(output_file, index=True, header=True, sep=',')
 
     @staticmethod
     def tokenize_multi_word_strings(tokens):
@@ -49,3 +48,20 @@ class StringUtils:
         for token in tokens:
             normalized_tokens.append(token.split())
         return normalized_tokens
+
+    @staticmethod
+    def remove_quotes(text):
+        text = text.replace("\"", "")
+        text = text.replace("\'", "")
+        return text
+
+    @staticmethod
+    def remove_brackets(text):
+        text = text.replace("[", "")
+        text = text.replace("]", "")
+        return text
+
+    @staticmethod
+    def remove_non_alphanumeric_chars(text):
+        regex = re.compile('[^a-zA-Z0-9, ]')
+        return regex.sub('', text)

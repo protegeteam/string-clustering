@@ -24,8 +24,8 @@ class StringNormalize:
 
     # replace all non-alphanumeric characters with spaces, and trim all extra white space
     def normalize(self, token):
-        token = self.pattern.sub(' ', token)
         token = self.parse_camel_case(token)
+        token = self.pattern.sub(' ', token)
         token = self.numbers_re.sub('', token)
         token = self.to_ascii(token)
         token = re.sub('\s+', ' ', token).strip()
